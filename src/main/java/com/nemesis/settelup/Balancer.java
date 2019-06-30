@@ -18,28 +18,9 @@ public class Balancer {
         this.addTransaction(creditor, debtor, BigDecimal.valueOf(amount));
     }
 
-    private void addTransaction(String creditor, String debtor, BigDecimal amount) {
+    public void addTransaction(String creditor, String debtor, BigDecimal amount) {
         status.get(creditor).subtract(amount);
         status.get(debtor).add(amount);
-    }
-
-    private BalancerTransaction getBalancerTransaction(Map<String, Amount> creditors, Map<String, Amount> debtors) {
-
-        BalancerTransaction balancerTransaction = new BalancerTransaction();
-
-        creditors.entrySet().stream().min(Map.Entry.comparingByValue()).ifPresent(entry ->
-                balancerTransaction.payee = new AbstractMap.SimpleEntry<>(entry)
-        );
-
-        debtors.entrySet().stream().min(Map.Entry.comparingByValue()).ifPresent(entry ->
-                balancerTransaction.payer = new AbstractMap.SimpleEntry<>(entry)
-        );
-
-        Amount payeeAbsValue = Amount.getAbs(balancerTransaction.payee.getValue());
-        Amount payerAbsValue = Amount.getAbs(balancerTransaction.payer.getValue());
-        balancerTransaction.amount = Amount.getMin(payeeAbsValue, payerAbsValue);
-
-        return balancerTransaction;
     }
 
     public List<BalancerTransaction> getBalancerTransactions() {
@@ -80,6 +61,25 @@ public class Balancer {
         }
 
         return balancerTransactions;
+    }
+
+    private BalancerTransaction getBalancerTransaction(Map<String, Amount> creditors, Map<String, Amount> debtors) {
+
+        BalancerTransaction balancerTransaction = new BalancerTransaction();
+
+        creditors.entrySet().stream().min(Map.Entry.comparingByValue()).ifPresent(entry ->
+                balancerTransaction.payee = new AbstractMap.SimpleEntry<>(entry)
+        );
+
+        debtors.entrySet().stream().min(Map.Entry.comparingByValue()).ifPresent(entry ->
+                balancerTransaction.payer = new AbstractMap.SimpleEntry<>(entry)
+        );
+
+        Amount payeeAbsValue = Amount.getAbs(balancerTransaction.payee.getValue());
+        Amount payerAbsValue = Amount.getAbs(balancerTransaction.payer.getValue());
+        balancerTransaction.amount = Amount.getMin(payeeAbsValue, payerAbsValue);
+
+        return balancerTransaction;
     }
 
     private boolean statusIsBalanced(Map<String, Amount> statusToBalance) {
